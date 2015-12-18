@@ -6,6 +6,7 @@ from google.appengine.ext import ndb
 
 import jinja2
 import webapp2
+from datetime import datetime
 import time
 
 
@@ -21,7 +22,7 @@ class Reservation(ndb.Model):
     book_person = ndb.StringProperty(required=True, indexed=True) # eamil
     resource_id = ndb.IntegerProperty()
     resource_name = ndb.StringProperty()
-    avail_date = ndb.StringProperty(indexed=True)
+    avail_date = ndb.DateProperty(indexed=True)
     created_date = ndb.DateTimeProperty(auto_now_add=True)
     start_time = ndb.IntegerProperty(indexed=True)
     end_time = ndb.IntegerProperty(indexed=True)
@@ -31,7 +32,7 @@ class Resource(ndb.Model):
     owner = ndb.StringProperty(required=True, indexed=True) # email
     resource_name = ndb.StringProperty(required=True, indexed=True)
     created_date = ndb.DateTimeProperty(auto_now_add=True)
-    avail_date = ndb.StringProperty(indexed=True)
+    avail_date = ndb.DateProperty(indexed=True)
     start_time = ndb.IntegerProperty(indexed=True)
     end_time = ndb.IntegerProperty(indexed=True)
     reservations = ndb.StructuredProperty(Reservation, repeated=True)
@@ -92,22 +93,34 @@ class CreateResource(webapp2.RequestHandler):
 
     # create new resource and return to main page
     def post(self):
-        start_time = int(self.request.get('stime'))
-        end_time = int(self.request.get('etime'))
-        if start_time >= end_time:
+        try:
+            avail_date = datetime.strptime(self.request.get('date'), '%Y-%m-%d')
+            start_time = int(self.request.get('stime'))
+            end_time = int(self.request.get('etime'))
+            today = datetime.now()
+            if start_time >= end_time:
+                template = JINJA_ENVIRONMENT.get_template('templates/error.html')
+                self.response.write(template.render({'message': "End time must be greater than Start"}))
+            elif avail_date <= today:
+                template = JINJA_ENVIRONMENT.get_template('templates/error.html')
+                self.response.write(template.render({'message': "The date should not before TODAY"}))
+            else:
+                new_res = Resource()
+                new_res.owner = users.get_current_user().email()
+                new_res.resource_name = self.request.get('name')
+                new_res.avail_date = avail_date
+                new_res.start_time = start_time
+                new_res.end_time = end_time
+                new_res.tags = str(self.request.get('tags')).split(',')
+                new_res.put()
+                time.sleep(0.1)
+                self.redirect('/')
+        except ValueError:
             template = JINJA_ENVIRONMENT.get_template('templates/error.html')
-            self.response.write(template.render({'message': "End time must be greater than Start"}))
-        else:
-            new_res = Resource()
-            new_res.owner = users.get_current_user().email()
-            new_res.resource_name = self.request.get('name')
-            new_res.avail_date = self.request.get('date')
-            new_res.start_time = start_time
-            new_res.end_time = end_time
-            new_res.tags = str(self.request.get('tags')).split(',')
-            new_res.put()
-            time.sleep(0.1)
-            self.redirect('/')
+            self.response.write(template.render({'message': "Please enter correct date format as year-mm-dd"}))
+
+def getOverlap(a, b):
+    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
 
 class ShowResource(webapp2.RequestHandler):
     # show the web page for resource
@@ -139,48 +152,59 @@ class ShowResource(webapp2.RequestHandler):
         if reser_button:
             start_time = int(self.request.get('stime'))
             end_time = int(self.request.get('etime'))
-            if start_time >= end_time:
-                template_values = {
-                    'message': "End time must be greater than Start and New Reservation cannot confilct with old ones."
-                }
-                template = JINJA_ENVIRONMENT.get_template('templates/error.html')
-                self.response.write(template.render(template_values))
+            resource_id = int(self.request.get('resouId'))
+            resource = Resource.get_by_id(resource_id)
+            template = JINJA_ENVIRONMENT.get_template('templates/error.html')
+
+            if start_time >= end_time:    
+                self.response.write(template.render({'message': "End time must be greater than Start"}))
+            elif start_time<resource.start_time or end_time>resource.end_time:
+                self.response.write(template.render({'message': "Reservation must made within resource time range"}))
             else:
+                prev_reservations = Reservation.gql("WHERE resource_id = :1", resource_id)
+                # self.response.write(template.render({'message': prev_reservations }))
+                for p in prev_reservations:
+                    if not (start_time>=p.end_time or end_time<=p.start_time):
+                        self.response.write(template.render({'message': "Reservation cannot conflict with previous ones."}))
+                        return
                 new_reserv = Reservation()
                 new_reserv.start_time = start_time
                 new_reserv.end_time = end_time
                 new_reserv.book_person = users.get_current_user().email()
 
-                resouce_id = int(self.request.get('resouId'))
-                resource = Resource.get_by_id(resouce_id)
                 new_reserv.resource_name = resource.resource_name
-                new_reserv.resource_id = resouce_id
+                new_reserv.resource_id = resource_id
                 new_reserv.avail_date = resource.avail_date
                 new_reserv.put()
-                resource.reservations.append(new_reserv)
 
-                time.sleep(0.5)
+                time.sleep(0.3)
                 self.redirect('/')
         if edit_button:
-            template = JINJA_ENVIRONMENT.get_template('templates/error.html')
-            self.response.write(template.render({'message': "Debug"}))
-            start_time = int(self.request.get('stime'))
-            end_time = int(self.request.get('etime'))
-            if start_time >= end_time:
+            try:
+                avail_date = datetime.strptime(self.request.get('date'), '%Y-%m-%d')
+                start_time = int(self.request.get('stime'))
+                end_time = int(self.request.get('etime'))
+                today = datetime.now()
+                if start_time >= end_time:
+                    template = JINJA_ENVIRONMENT.get_template('templates/error.html')
+                    self.response.write(template.render({'message': "End time must be greater than Start"}))
+                elif avail_date <= today:
+                    template = JINJA_ENVIRONMENT.get_template('templates/error.html')
+                    self.response.write(template.render({'message': "The date should not before TODAY"}))
+                else:
+                    resource_id = int(self.request.get('resouId'))
+                    cur = Resource.get_by_id(resource_id)
+                    cur.resource_name = self.request.get('name')
+                    cur.avail_date = avail_date
+                    cur.start_time = int(self.request.get('stime'))
+                    cur.end_time = int(self.request.get('etime'))
+                    cur.tags = str(self.request.get('tags')).split(',')
+                    cur.put()
+                    time.sleep(0.3)
+                    self.redirect('/')
+            except ValueError:
                 template = JINJA_ENVIRONMENT.get_template('templates/error.html')
-                self.response.write(template.render({'message': "End time must be greater than Start"}))
-            else:
-                resouce_id = int(self.request.get('resouId'))
-                cur = Resource.get_by_id(resouce_id)
-                cur.resource_name = self.request.get('name')
-                cur.avail_date = self.request.get('date')
-                cur.start_time = int(self.request.get('stime'))
-                cur.end_time = int(self.request.get('etime'))
-                cur.tags = str(self.request.get('tags')).split(',')
-                cur.put()
-
-                time.sleep(0.1)
-                self.redirect('/')
+                self.response.write(template.render({'message': "Please enter correct date format as year-mm-dd"}))
 
 
 class DeleteReservation(webapp2.RequestHandler):
@@ -188,8 +212,7 @@ class DeleteReservation(webapp2.RequestHandler):
         cur_id = int(self.request.get('reser_id'))
         cur = Reservation.get_by_id(cur_id)
         cur.key.delete()
-
-        time.sleep(0.2)
+        time.sleep(0.3)
         self.redirect('/')
 
 

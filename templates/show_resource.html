@@ -56,7 +56,7 @@
                         <div class="form-group">
                             <label>Start Time</label>
                             <select class="form-control" name="stime">
-                                {% for x in range(24) %}
+                                {% for x in range(25) %}
                                     {% if resource.start_time == x %}
                                           <option value="{{ x }}" selected>{{ x }}</option>
                                     {% else %}  
@@ -68,7 +68,7 @@
                         <div class="form-group">
                             <label>End Time</label>
                             <select class="form-control" name="etime">
-                                {% for x in range(24) %}
+                                {% for x in range(25) %}
                                     {% if resource.end_time == x %}
                                           <option value="{{ x }}" selected>{{ x }}</option>
                                     {% else %}  
@@ -97,7 +97,7 @@
                       <tr>
                         <th>Booked By</th>
                         <th>Date</th>
-                        <th>Time</th>
+                        <th>Time(0-24)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -113,13 +113,13 @@
             </div><!-- End of show past reservations -->
 
             <div class="col-md-4 text-center">
-                <h3>Add Reservations</h3>
+                <h3>Add New Reservation</h3>
                 <form action="/resource" enctype="multipart/form-data" method="post" style="padding:15px;min-width:250px;">
                     <div class="text-left" style="padding: 15px;max-width: 600px;"> 
                         <div class="form-group">
                             <label>Start Time</label>
                             <select class="form-control" name="stime">
-                                {% for x in range(24) %}
+                                {% for x in range(25) %}
                                     <option value="{{ x }}">{{ x }}</option>
                                 {% endfor %}
                             </select>
@@ -127,7 +127,7 @@
                         <div class="form-group">
                             <label>End Time</label>
                             <select class="form-control" name="etime">
-                                {% for x in range(24) %}
+                                {% for x in range(25) %}
                                     <option value="{{ x }}">{{ x }}</option>
                                 {% endfor %}
                             </select>

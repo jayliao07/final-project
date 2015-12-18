@@ -51,11 +51,11 @@
                     Name<br>
                     <input type=text name="name" class="form-control" required></input>
                     <br>Date<br>
-                    <input name="date" class="form-control" required></input><br>
+                    <input name="date" class="form-control" placeholder="year-mm-dd" required></input><br>
                     <div class="form-group">
                         <label>Start Time</label>
                         <select class="form-control" name="stime">
-                            {% for x in range(24) %}
+                            {% for x in range(25) %}
                                   <option value="{{ x }}">{{ x }}</option>
                             {% endfor %}
                         </select>
@@ -63,7 +63,7 @@
                     <div class="form-group">
                         <label>End Time</label>
                         <select class="form-control" name="etime">
-                            {% for x in range(24) %}
+                            {% for x in range(25) %}
                                   <option value="{{ x }}">{{ x }}</option>
                             {% endfor %}
                         </select>
