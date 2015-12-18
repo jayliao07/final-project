@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Show Resource</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="stylesheets/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="stylesheets/css/heroic-features.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">NYU OST</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Page Features -->
+        <div class="col-md-12">
+            <div class="col-md-4 text-center">
+                <h3>Resource Information</h3>
+                <form action="/resource" enctype="multipart/form-data" method="post">
+                    <div class="text-left" style="padding: 15px;max-width: 600px;"> 
+                        Name<br>
+                        <input type=text name="name" class="form-control" value="{{ resource.resource_name }}" required></input>
+                        <br>Date<br>
+                        <input name="date" class="form-control" value="{{ resource.avail_date }}" required></input>
+                        <div class="form-group">
+                            <label>Start Time</label>
+                            <select class="form-control" name="stime">
+                                {% for x in range(24) %}
+                                    {% if resource.start_time == x %}
+                                          <option value="{{ x }}" selected>{{ x }}</option>
+                                    {% else %}  
+                                          <option value="{{ x }}">{{ x }}</option>
+                                    {% endif %} 
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>End Time</label>
+                            <select class="form-control" name="etime">
+                                {% for x in range(24) %}
+                                    {% if resource.end_time == x %}
+                                          <option value="{{ x }}" selected>{{ x }}</option>
+                                    {% else %}  
+                                          <option value="{{ x }}">{{ x }}</option>
+                                    {% endif %} 
+                                {% endfor %}
+                            </select>
+                        </div>
+                        Tags<br>
+                        <input type=text name="tags" class="form-control" value="{{ resource.tags }}"></input>
+                        <input type="hidden" name="edit-btn" value="first"></input>
+                        <input type="hidden" name="resouId" value="{{ resource.key.id() }}"></input>
+                        {% if canEdit %}
+                        <br><button class="btn btn-success" type="submit" >Edit Resource</button>
+                        {% else %}
+                        <br><button class="btn btn-success" type="submit" disabled>Edit Resource</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div><!-- End of Edit Resource -->
+
+            <div class="col-md-4" >
+                <h3>Recent Reservations</h3>
+                <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Booked By</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in reservations %}
+                        <tr>
+                            <td>{{ r.book_person}}</td>
+                            <td>{{ r.avail_date}}</td>
+                            <td>{{ r.start_time}} to {{ r.end_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                  </table>
+            </div><!-- End of show past reservations -->
+
+            <div class="col-md-4 text-center">
+                <h3>Add Reservations</h3>
+                <form action="/resource" enctype="multipart/form-data" method="post" style="padding:15px;min-width:250px;">
+                    <div class="text-left" style="padding: 15px;max-width: 600px;"> 
+                        <div class="form-group">
+                            <label>Start Time</label>
+                            <select class="form-control" name="stime">
+                                {% for x in range(24) %}
+                                    <option value="{{ x }}">{{ x }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>End Time</label>
+                            <select class="form-control" name="etime">
+                                {% for x in range(24) %}
+                                    <option value="{{ x }}">{{ x }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <input type="hidden" name ="reser-btn" value ="second"></input>
+                        <input type="hidden" name="resouId" value="{{resource.key.id()}}"></input>
+                        <br><button class="btn btn-success" type="submit">Confirm Reservation</button>
+                    </div>
+                </form>
+            </div><!-- End of Add reservations -->
+        </div>
+
+    </div><!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="stylesheets/js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="stylesheets/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
+{% endautoescape %}
