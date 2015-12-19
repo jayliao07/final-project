@@ -53,8 +53,8 @@ class MainPage(webapp2.RequestHandler):
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Sign out'
             user_email = user.email()
-            all_resources = Resource.gql("ORDER BY created_date DESC")
-            user_resources = Resource.gql("WHERE owner = :1 ORDER BY created_date DESC", user_email)
+            all_resources = Resource.gql("ORDER BY avail_date")
+            user_resources = Resource.gql("WHERE owner = :1 ORDER BY avail_date", user_email)
 
             today = datetime.now()
             # only show reservations after today's date
@@ -192,7 +192,7 @@ class ShowResource(webapp2.RequestHandler):
                         if not (start_time>=p.end_time or end_time<=p.start_time):
                             self.response.write(template.render({'message': "You already have reservations at this time range"}))
                             return
-                            
+
                 new_reserv = Reservation()
                 new_reserv.start_time = start_time
                 new_reserv.end_time = end_time
