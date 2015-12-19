@@ -48,3 +48,9 @@ indexes:
   - name: owner
   - name: created_date
     direction: desc
+
+- kind: Resource
+  properties:
+  - name: resource_name
+  - name: created_date
+    direction: desc

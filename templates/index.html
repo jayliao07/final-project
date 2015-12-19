@@ -72,15 +72,17 @@
         <!-- Page Features -->
         <div class="col-md-3">
             <div class="well">
-                <h4>Resource Search</h4>
-                <div class="input-group">
-                    <input type="text" class="form-control">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">
-                            <span class="glyphicon glyphicon-search"></span>
-                        </button>
-                    </span>
-                </div>
+                <h4>Search by Name</h4>
+                <form action="/" enctype="multipart/form-data" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search_name">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>
+                    </div>
+                <form>
                 <!-- /.input-group -->
             </div>
             <div style="margin:10px;">
@@ -177,7 +179,7 @@
                             {% for r in user_reservations %}
                             <tr>
                                 <td><a href="/resource?resource_id={{ r.resource_id }}">{{ r.resource_name }}</a></td>
-                                <td>{{ r.book_person }}</td>
+                                <td><a href="/user?email={{r.book_person}}">{{ r.book_person }}</a></td>
                                 <td>{{ r.avail_date }}</td>
                                 <td>{{ r.start_time }} - {{ r.end_time }}</td>
                                 <td><a class="btn btn-danger" href="/deleteReserv?reser_id={{ r.key.id() }}">Delete</a></td>

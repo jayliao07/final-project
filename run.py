@@ -3,6 +3,7 @@ import urllib
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
+from google.appengine.api import mail
 
 import jinja2
 import webapp2
@@ -62,6 +63,7 @@ class MainPage(webapp2.RequestHandler):
             all_tags = sorted(set([j for i in all_resources for j in i.tags]))
 
             search_tag = self.request.get('tag')
+            search_name = self.request.get('search_name')
 
             if search_tag:
                 all_rs = []
@@ -75,7 +77,9 @@ class MainPage(webapp2.RequestHandler):
                 all_resources = all_rs
                 user_resources = user_rs
 
-            # uid = user.user_id() 
+            if search_name:
+                all_resources = Resource.gql("WHERE resource_name = :1 ORDER BY created_date DESC", search_name)
+
             template_values = {
                 'user': user,
                 'url': url,
@@ -91,7 +95,6 @@ class MainPage(webapp2.RequestHandler):
             url = users.create_login_url(self.request.uri)
             url_linktext = 'Sign in'
             user_email = 'New Guest'
-            # uid = -1
 
             template_values = {
                 'user': user,
@@ -119,9 +122,9 @@ class CreateResource(webapp2.RequestHandler):
             if start_time >= end_time:
                 template = JINJA_ENVIRONMENT.get_template('templates/error.html')
                 self.response.write(template.render({'message': "End time must be greater than Start"}))
-            elif avail_date <= today:
+            elif avail_date < today:
                 template = JINJA_ENVIRONMENT.get_template('templates/error.html')
-                self.response.write(template.render({'message': "The date should not before TODAY"}))
+                self.response.write(template.render({'message': "The date should after Now"}))
             else:
                 new_res = Resource()
                 new_res.owner = users.get_current_user().email()
@@ -203,9 +206,9 @@ class ShowResource(webapp2.RequestHandler):
                 if start_time >= end_time:
                     template = JINJA_ENVIRONMENT.get_template('templates/error.html')
                     self.response.write(template.render({'message': "End time must be greater than Start"}))
-                elif avail_date <= today:
+                elif avail_date < today:
                     template = JINJA_ENVIRONMENT.get_template('templates/error.html')
-                    self.response.write(template.render({'message': "The date should not before TODAY"}))
+                    self.response.write(template.render({'message': "The date should after Now"}))
                 else:
                     resource_id = int(self.request.get('resouId'))
                     cur = Resource.get_by_id(resource_id)
@@ -220,6 +223,25 @@ class ShowResource(webapp2.RequestHandler):
             except ValueError:
                 template = JINJA_ENVIRONMENT.get_template('templates/error.html')
                 self.response.write(template.render({'message': "Please enter correct date format as year-mm-dd"}))
+
+class ShowUser(webapp2.RequestHandler):
+    # show the web page for a user
+    def get(self):
+        user_email = self.request.get('email')
+
+        resources=Resource.gql("WHERE owner = :1 ORDER BY created_date DESC", user_email)
+        today = datetime.now()
+        # only show reservations after today's date
+        reservations = Reservation.gql("WHERE book_person = :1 AND avail_date >= :2 ORDER By avail_date",
+                         user_email, today)
+
+        template_values = {
+            'user_email': user_email,
+            'resources': resources,
+            'reservations': reservations,
+        }
+        template = JINJA_ENVIRONMENT.get_template('templates/show_user.html')
+        self.response.write(template.render(template_values))
 
 class DeleteReservation(webapp2.RequestHandler):
     def get(self):
@@ -253,6 +275,7 @@ app = webapp2.WSGIApplication([
     ('/tag', MainPage),
     ('/createResource', CreateResource),
     ('/resource', ShowResource),
+    ('/user', ShowUser),
     ('/deleteReserv', DeleteReservation),
     ('/rss', RSS)
 ], debug=True)

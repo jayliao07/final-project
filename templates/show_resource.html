@@ -102,11 +102,7 @@
                     <tbody>
                         {% for r in reservations %}
                         <tr>
-                            {% if canEdit %}
-                                <td>{{ r.book_person }}</td>
-                            {% else %} 
-                                <td>Anonymous</td>
-                            {% endif %}
+                            <td><a href="/user?email={{r.book_person}}">{{ r.book_person }}</a></td>
                             <td>{{ r.avail_date}}</td>
                             <td>{{ r.start_time}} - {{ r.end_time }}</td>
                         </tr>
