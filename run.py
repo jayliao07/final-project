@@ -57,6 +57,21 @@ class MainPage(webapp2.RequestHandler):
                          user_email)
             user_reservations = Reservation.gql("WHERE book_person = :1 ORDER BY start_time",
                          user_email)
+            all_tags = sorted(set([j for i in all_resources for j in i.tags]))
+
+            search_tag = self.request.get('tag')
+
+            if search_tag:
+                all_rs = []
+                user_rs = []
+                for r in all_resources:
+                    if search_tag in r.tags:
+                        all_rs.append(r)
+                for r in user_resources:
+                    if search_tag in r.tags:
+                        user_rs.append(r)
+                all_resources = all_rs
+                user_resources = user_rs
 
             # uid = user.user_id() 
             template_values = {
@@ -67,6 +82,7 @@ class MainPage(webapp2.RequestHandler):
                 'all_resources':all_resources,
                 'user_resources':user_resources,
                 'user_reservations': user_reservations,
+                'all_tags': all_tags
             }
 
         else:
@@ -111,16 +127,14 @@ class CreateResource(webapp2.RequestHandler):
                 new_res.avail_date = avail_date
                 new_res.start_time = start_time
                 new_res.end_time = end_time
-                new_res.tags = str(self.request.get('tags')).split(',')
+                tags = self.request.get('tags')
+                new_res.tags = tags.split()
                 new_res.put()
                 time.sleep(0.1)
                 self.redirect('/')
         except ValueError:
             template = JINJA_ENVIRONMENT.get_template('templates/error.html')
             self.response.write(template.render({'message': "Please enter correct date format as year-mm-dd"}))
-
-def getOverlap(a, b):
-    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
 
 class ShowResource(webapp2.RequestHandler):
     # show the web page for resource
@@ -198,7 +212,7 @@ class ShowResource(webapp2.RequestHandler):
                     cur.avail_date = avail_date
                     cur.start_time = int(self.request.get('stime'))
                     cur.end_time = int(self.request.get('etime'))
-                    cur.tags = str(self.request.get('tags')).split(',')
+                    cur.tags = self.request.get('tags').split()
                     cur.put()
                     time.sleep(0.3)
                     self.redirect('/')
@@ -218,6 +232,7 @@ class DeleteReservation(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/tag', MainPage),
     ('/createResource', CreateResource),
     ('/resource', ShowResource),
     ('/deleteReserv', DeleteReservation)
