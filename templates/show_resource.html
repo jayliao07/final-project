@@ -89,7 +89,7 @@
                 </form>
             </div><!-- End of Edit Resource -->
 
-            <div class="col-md-4" >
+            <div class="col-md-5" >
                 <h3>Recent Reservations</h3>
                 <table class="table table-hover">
                     <thead>
@@ -102,16 +102,20 @@
                     <tbody>
                         {% for r in reservations %}
                         <tr>
-                            <td>{{ r.book_person}}</td>
+                            {% if canEdit %}
+                                <td>{{ r.book_person }}</td>
+                            {% else %} 
+                                <td>Anonymous</td>
+                            {% endif %}
                             <td>{{ r.avail_date}}</td>
-                            <td>{{ r.start_time}} to {{ r.end_time }}</td>
+                            <td>{{ r.start_time}} - {{ r.end_time }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                   </table>
             </div><!-- End of show past reservations -->
 
-            <div class="col-md-4 text-center">
+            <div class="col-md-3 text-center">
                 <h3>Add New Reservation</h3>
                 <form action="/resource" enctype="multipart/form-data" method="post" style="padding:15px;min-width:250px;">
                     <div class="text-left" style="padding: 15px;max-width: 600px;"> 

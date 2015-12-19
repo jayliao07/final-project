@@ -53,10 +53,12 @@ class MainPage(webapp2.RequestHandler):
             url_linktext = 'Sign out'
             user_email = user.email()
             all_resources = Resource.gql("ORDER BY created_date DESC")
-            user_resources = Resource.gql("WHERE owner = :1 ORDER BY created_date DESC",
-                         user_email)
-            user_reservations = Reservation.gql("WHERE book_person = :1 ORDER BY start_time",
-                         user_email)
+            user_resources = Resource.gql("WHERE owner = :1 ORDER BY created_date DESC", user_email)
+
+            today = datetime.now()
+            # only show reservations after today's date
+            user_reservations = Reservation.gql("WHERE book_person = :1 AND avail_date >= :2 ORDER By avail_date",
+                         user_email, today)
             all_tags = sorted(set([j for i in all_resources for j in i.tags]))
 
             search_tag = self.request.get('tag')
@@ -143,8 +145,7 @@ class ShowResource(webapp2.RequestHandler):
 
         resource_id = int(self.request.get('resource_id'))
         resource=Resource.get_by_id(resource_id)
-        reservations=Reservation.gql("WHERE resource_id = :1 ORDER BY start_time",
-                         resource_id)
+        reservations=Reservation.gql("WHERE resource_id = :1 ORDER BY start_time", resource_id)
 
         canEdit = False
         if user.email() == resource.owner:
@@ -220,7 +221,6 @@ class ShowResource(webapp2.RequestHandler):
                 template = JINJA_ENVIRONMENT.get_template('templates/error.html')
                 self.response.write(template.render({'message': "Please enter correct date format as year-mm-dd"}))
 
-
 class DeleteReservation(webapp2.RequestHandler):
     def get(self):
         cur_id = int(self.request.get('reser_id'))
@@ -229,11 +229,30 @@ class DeleteReservation(webapp2.RequestHandler):
         time.sleep(0.3)
         self.redirect('/')
 
+class RSS(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+
+        resource_id = int(self.request.get('resource_id'))
+        resource=Resource.get_by_id(resource_id)
+        reservations=Reservation.gql("WHERE resource_id = :1 ORDER BY start_time", resource_id)
+
+        template_values = {
+            'user': user,
+            'resource': resource,
+            'reservations': reservations
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('templates/rss.html')
+        self.response.headers['Content-Type'] = "text/xml; charset=utf-8"
+        self.response.write(template.render(template_values))
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/tag', MainPage),
     ('/createResource', CreateResource),
     ('/resource', ShowResource),
-    ('/deleteReserv', DeleteReservation)
+    ('/deleteReserv', DeleteReservation),
+    ('/rss', RSS)
 ], debug=True)

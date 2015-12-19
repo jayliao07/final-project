@@ -13,6 +13,17 @@ indexes:
 - kind: Reservation
   properties:
   - name: book_person
+  - name: avail_date
+
+- kind: Reservation
+  properties:
+  - name: book_person
+  - name: avail_date
+    direction: desc
+
+- kind: Reservation
+  properties:
+  - name: book_person
   - name: created_date
     direction: desc
 

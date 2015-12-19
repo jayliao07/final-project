@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+<channel>
+    <title>{{ resource.resource_name }}'s reservations</title>
+    <link>http://firstpyproj-1057.appspot.com/</link>
+    <description>reservations</description>
+    {% for r in reservations %}
+    <item>
+        <user>{{ r.book_person }}</user>
+        <date>{{ r.avail_date }}</date>
+        <time>{{ r.start_time }} to {{ r.end_time }}</time>
+    </item>
+    {% endfor %}
+</channel>
+</rss>
