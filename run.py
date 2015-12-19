@@ -179,12 +179,20 @@ class ShowResource(webapp2.RequestHandler):
             elif start_time<resource.start_time or end_time>resource.end_time:
                 self.response.write(template.render({'message': "Reservation must made within resource time range"}))
             else:
+                # compare with this resource's old reservations
                 prev_reservations = Reservation.gql("WHERE resource_id = :1", resource_id)
-                # self.response.write(template.render({'message': prev_reservations }))
                 for p in prev_reservations:
                     if not (start_time>=p.end_time or end_time<=p.start_time):
                         self.response.write(template.render({'message': "Reservation cannot conflict with previous ones."}))
                         return
+                # compare with this user's old reservations
+                user_prev_reser = Reservation.gql("WHERE book_person = :1", users.get_current_user().email())
+                for p in user_prev_reser:
+                    if  resource.avail_date == p.avail_date:
+                        if not (start_time>=p.end_time or end_time<=p.start_time):
+                            self.response.write(template.render({'message': "You already have reservations at this time range"}))
+                            return
+                            
                 new_reserv = Reservation()
                 new_reserv.start_time = start_time
                 new_reserv.end_time = end_time

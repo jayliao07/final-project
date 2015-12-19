@@ -13,7 +13,7 @@ Google appspot url: http://firstpyproj-1057.appspot.com/
 
 ## Basic Features
 
- 1. Each user can login using google account to create or reserve resources
+ 1. Muliple User
  2. After login, you can see 3 tab with all resources, your resources your coming Reservations. The search and tags column are on the left.
  3. Done with GQL query.
  4. Here I use 0-24 time system when creating a resource.
