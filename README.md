@@ -1,9 +1,12 @@
 Final Project Developer Guide
 ===========================================================
 
-This markdown file is nicer displayed online(such as github) than in a text editor.
 Jiacheng Liao
+
+This markdown file is nicer displayed online(such as github) than in a text editor.
+
 Git Repo: https://github.com/miracleoops/final-project
+
 Google appspot url: http://firstpyproj-1057.appspot.com/
 
 ## Web App Design
@@ -14,9 +17,9 @@ Google appspot url: http://firstpyproj-1057.appspot.com/
 ## Basic Features
 
  1. Muliple User
- 2. After login, you can see 3 tab with all resources, your resources your coming Reservations. The search and tags column are on the left.
- 3. Done with GQL query.
- 4. Here I use 0-24 time system when creating a resource.
+ 2. After login, you can see 3 tab with all resources, your resources your coming reservations. The add resource button, search name and tags column are on the left.
+ 3. Done with GQL query. 
+ 4. Here I assume 0-24 time system when creating a resource.
  5. Here (1)(2)(3) are shown on the same page since I feel it's better for user if they can see the resource's info and recent reservations made when the user are making a reservation. If you are not the owner of the resource, then edit button is disabled. 
  6. Here a start time and end time is used for reservation like resources. (Equivalent of start time and duration)
  7. A user can see his/her reservations on the homepage. 
@@ -26,7 +29,8 @@ Google appspot url: http://firstpyproj-1057.appspot.com/
 
 ## Extra Credit Feature
 
- - Support the ability to search for resources by name. (This is similar to tag search)
+ - Support the ability to search for resources by name. (Similar to tag search)
+ - Support a requirement where a user can only have one reservation at a time.
 
 ##Note
 
